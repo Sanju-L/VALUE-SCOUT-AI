@@ -1,0 +1,2338 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="ValueScout AI — Neo-futuristic AI-powered cross-platform e-commerce price comparator and analytics engine.">
+    <title>ValueScout AI — Cross-Platform E-Commerce Comparator</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <style>
+        /* ══════════════════════════════════════════════════
+           DESIGN TOKENS & RESET
+           ══════════════════════════════════════════════════ */
+        :root {
+            --bg-void: #050505;
+            --bg-card: rgba(15, 23, 42, 0.55);
+            --bg-card-solid: rgba(15, 23, 42, 0.8);
+            --border-glass: rgba(0, 243, 255, 0.08);
+            --border-hover: rgba(0, 243, 255, 0.2);
+            --cyan: #00f3ff;
+            --cyan-dim: rgba(0, 243, 255, 0.15);
+            --cyan-glow: rgba(0, 243, 255, 0.35);
+            --emerald: #00ff66;
+            --emerald-dim: rgba(0, 255, 102, 0.12);
+            --danger: #ef4444;
+            --danger-dim: rgba(239, 68, 68, 0.12);
+            --text-primary: #f0f4f8;
+            --text-secondary: #8892a4;
+            --text-muted: #4a5568;
+            --surface-dark: rgba(8, 12, 20, 0.7);
+            --font-sans: 'Inter', system-ui, -apple-system, sans-serif;
+            --font-mono: 'JetBrains Mono', 'Fira Code', monospace;
+        }
+
+        *, *::before, *::after {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html {
+            font-family: var(--font-sans);
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+            scroll-behavior: smooth;
+        }
+
+        body {
+            min-height: 100vh;
+            background: var(--bg-void);
+            background-image:
+                radial-gradient(ellipse 80% 50% at 50% -10%, rgba(0, 243, 255, 0.04) 0%, transparent 60%),
+                radial-gradient(ellipse 60% 40% at 50% 110%, rgba(0, 255, 102, 0.03) 0%, transparent 50%),
+                radial-gradient(circle at 20% 50%, rgba(0, 243, 255, 0.015) 0%, transparent 40%),
+                radial-gradient(circle at 80% 50%, rgba(0, 255, 102, 0.01) 0%, transparent 40%);
+            color: var(--text-primary);
+            overflow-x: hidden;
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar { width: 5px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: rgba(0, 243, 255, 0.15); border-radius: 3px; }
+        ::-webkit-scrollbar-thumb:hover { background: rgba(0, 243, 255, 0.3); }
+
+        /* ══════════════════════════════════════════════════
+           ANTIGRAVITY KEYFRAMES
+           ══════════════════════════════════════════════════ */
+        @keyframes antigravity {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-8px); }
+        }
+
+        @keyframes antigravity-slow {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-5px); }
+        }
+
+        @keyframes glow-pulse {
+            0%, 100% { opacity: 0.6; }
+            50% { opacity: 1; }
+        }
+
+        @keyframes spin-ring {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        @keyframes spin-reverse {
+            0% { transform: rotate(360deg); }
+            100% { transform: rotate(0deg); }
+        }
+
+        @keyframes orbit {
+            0% { transform: rotate(0deg) translateX(52px) rotate(0deg); }
+            100% { transform: rotate(360deg) translateX(52px) rotate(-360deg); }
+        }
+
+        @keyframes orbit-reverse {
+            0% { transform: rotate(180deg) translateX(38px) rotate(-180deg); }
+            100% { transform: rotate(540deg) translateX(38px) rotate(-540deg); }
+        }
+
+        @keyframes text-flicker {
+            0%, 100% { opacity: 0.4; }
+            50% { opacity: 1; }
+        }
+
+        @keyframes shimmer {
+            0% { background-position: -200% 0; }
+            100% { background-position: 200% 0; }
+        }
+
+        @keyframes slide-up-in {
+            0% { opacity: 0; transform: translateY(40px) scale(0.97); }
+            100% { opacity: 1; transform: translateY(0px) scale(1); }
+        }
+
+        @keyframes fade-in {
+            0% { opacity: 0; }
+            100% { opacity: 1; }
+        }
+
+        @keyframes scan-line {
+            0% { top: -2px; }
+            100% { top: 100%; }
+        }
+
+        @keyframes badge-shimmer {
+            0% { background-position: -200% 0; }
+            100% { background-position: 200% 0; }
+        }
+
+        @keyframes border-glow {
+            0%, 100% { border-color: rgba(0, 243, 255, 0.08); }
+            50% { border-color: rgba(0, 243, 255, 0.2); }
+        }
+
+        /* ══════════════════════════════════════════════════
+           LAYOUT
+           ══════════════════════════════════════════════════ */
+        .app-container {
+            max-width: 820px;
+            margin: 0 auto;
+            padding: 40px 20px 60px;
+            position: relative;
+        }
+
+        /* ══════════════════════════════════════════════════
+           HEADER
+           ══════════════════════════════════════════════════ */
+        .header {
+            text-align: center;
+            margin-bottom: 48px;
+            animation: fade-in 0.8s ease-out;
+        }
+
+        .header-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 6px 16px;
+            border-radius: 100px;
+            background: var(--bg-card);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid var(--border-glass);
+            margin-bottom: 20px;
+            font-size: 11px;
+            font-weight: 600;
+            letter-spacing: 2.5px;
+            text-transform: uppercase;
+            color: var(--cyan);
+            animation: antigravity-slow 4s ease-in-out infinite;
+        }
+
+        .header-badge .dot {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: var(--cyan);
+            box-shadow: 0 0 8px var(--cyan);
+            animation: glow-pulse 2s ease-in-out infinite;
+        }
+
+        .header h1 {
+            font-size: clamp(36px, 6vw, 52px);
+            font-weight: 900;
+            letter-spacing: -1.5px;
+            line-height: 1.1;
+            margin-bottom: 8px;
+        }
+
+        .header h1 .brand-glow {
+            color: var(--cyan);
+            text-shadow: 0 0 30px rgba(0, 243, 255, 0.4), 0 0 80px rgba(0, 243, 255, 0.1);
+        }
+
+        .header h1 .brand-white {
+            color: rgba(255, 255, 255, 0.9);
+        }
+
+        .header .subtitle {
+            font-size: 14px;
+            color: var(--text-secondary);
+            font-weight: 400;
+            letter-spacing: 0.5px;
+        }
+
+        .header .subtitle span {
+            color: var(--text-muted);
+        }
+
+        /* ══════════════════════════════════════════════════
+           GLASSMORPHISM CARD BASE
+           ══════════════════════════════════════════════════ */
+        .glass-card {
+            background: var(--bg-card);
+            backdrop-filter: blur(20px) saturate(1.2);
+            -webkit-backdrop-filter: blur(20px) saturate(1.2);
+            border: 1px solid var(--border-glass);
+            border-radius: 16px;
+            box-shadow:
+                0 20px 60px rgba(0, 0, 0, 0.4),
+                0 4px 20px rgba(0, 0, 0, 0.3),
+                inset 0 1px 0 rgba(255, 255, 255, 0.03);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .glass-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, rgba(0, 243, 255, 0.15), transparent);
+        }
+
+        .float {
+            animation: antigravity 5s ease-in-out infinite;
+        }
+
+        .float-delayed {
+            animation: antigravity 5s ease-in-out 0.5s infinite;
+        }
+
+        .float-slow {
+            animation: antigravity-slow 6s ease-in-out infinite;
+        }
+
+        /* ══════════════════════════════════════════════════
+           SEARCH SECTION
+           ══════════════════════════════════════════════════ */
+        .search-section {
+            margin-bottom: 32px;
+            animation: slide-up-in 0.6s ease-out 0.2s both;
+        }
+
+        .search-card {
+            padding: 6px;
+        }
+
+        .search-inner {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .search-icon-wrap {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0 4px 0 14px;
+            color: var(--text-muted);
+        }
+
+        .search-icon-wrap svg {
+            width: 20px;
+            height: 20px;
+            stroke: var(--text-muted);
+            transition: stroke 0.3s;
+        }
+
+        .search-input {
+            flex: 1;
+            background: transparent;
+            border: none;
+            outline: none;
+            color: var(--text-primary);
+            font-family: var(--font-sans);
+            font-size: 15px;
+            font-weight: 400;
+            padding: 14px 8px;
+            letter-spacing: 0.2px;
+        }
+
+        .search-input::placeholder {
+            color: rgba(136, 146, 164, 0.5);
+        }
+
+        .search-input:focus ~ .search-icon-wrap svg,
+        .search-inner:focus-within .search-icon-wrap svg {
+            stroke: var(--cyan);
+        }
+
+        .search-btn {
+            flex-shrink: 0;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 12px;
+            background: linear-gradient(135deg, #00c8d6, #00a3ff);
+            color: #000;
+            font-family: var(--font-sans);
+            font-size: 12px;
+            font-weight: 700;
+            letter-spacing: 1.8px;
+            text-transform: uppercase;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.22, 1, 0.36, 1);
+            box-shadow: 0 4px 20px rgba(0, 195, 255, 0.2);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .search-btn::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(135deg, rgba(255,255,255,0.15), transparent);
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+
+        .search-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 30px rgba(0, 195, 255, 0.35), 0 0 15px rgba(0, 243, 255, 0.15);
+        }
+
+        .search-btn:hover::before {
+            opacity: 1;
+        }
+
+        .search-btn:active {
+            transform: translateY(0px) scale(0.98);
+        }
+
+        .search-btn:disabled {
+            opacity: 0.35;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        .search-hint {
+            text-align: center;
+            font-size: 11px;
+            color: var(--text-muted);
+            margin-top: 14px;
+            letter-spacing: 0.3px;
+            animation: fade-in 1s ease-out 0.8s both;
+        }
+
+        .search-hint span {
+            color: var(--cyan);
+            opacity: 0.5;
+        }
+
+        /* ══════════════════════════════════════════════════
+           LOADER
+           ══════════════════════════════════════════════════ */
+        #loader {
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 64px 20px;
+            animation: fade-in 0.4s ease-out;
+        }
+
+        .loader-ring-system {
+            position: relative;
+            width: 120px;
+            height: 120px;
+            margin-bottom: 32px;
+        }
+
+        .loader-ring {
+            position: absolute;
+            border-radius: 50%;
+            border: 2px solid transparent;
+        }
+
+        .loader-ring-outer {
+            inset: 0;
+            border-top-color: var(--cyan);
+            border-right-color: rgba(0, 243, 255, 0.2);
+            animation: spin-ring 2s linear infinite;
+        }
+
+        .loader-ring-mid {
+            inset: 10px;
+            border-bottom-color: var(--emerald);
+            border-left-color: rgba(0, 255, 102, 0.15);
+            animation: spin-reverse 3s linear infinite;
+        }
+
+        .loader-ring-inner {
+            inset: 22px;
+            border-top-color: rgba(0, 243, 255, 0.4);
+            animation: spin-ring 1.5s linear infinite;
+        }
+
+        .loader-orbit-dot {
+            position: absolute;
+            inset: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .loader-orbit-dot.primary {
+            animation: orbit 2.5s linear infinite;
+        }
+
+        .loader-orbit-dot.secondary {
+            animation: orbit-reverse 3.5s linear infinite;
+        }
+
+        .loader-orbit-dot .dot {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            box-shadow: 0 0 10px currentColor;
+        }
+
+        .loader-orbit-dot.primary .dot {
+            background: var(--cyan);
+            color: var(--cyan);
+        }
+
+        .loader-orbit-dot.secondary .dot {
+            width: 4px;
+            height: 4px;
+            background: var(--emerald);
+            color: var(--emerald);
+        }
+
+        .loader-core-icon {
+            position: absolute;
+            inset: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            animation: glow-pulse 2s ease-in-out infinite;
+        }
+
+        .loader-core-icon svg {
+            width: 28px;
+            height: 28px;
+            stroke: var(--cyan);
+        }
+
+        .loader-text {
+            font-size: 13px;
+            font-weight: 500;
+            color: var(--text-secondary);
+            letter-spacing: 0.5px;
+            animation: text-flicker 2.5s ease-in-out infinite;
+        }
+
+        .loader-bar {
+            margin-top: 20px;
+            width: 180px;
+            height: 2px;
+            border-radius: 2px;
+            background: rgba(255, 255, 255, 0.04);
+            overflow: hidden;
+        }
+
+        .loader-bar-fill {
+            height: 100%;
+            width: 100%;
+            border-radius: 2px;
+            background: linear-gradient(90deg, transparent, var(--cyan), transparent);
+            background-size: 200% 100%;
+            animation: shimmer 1.5s linear infinite;
+        }
+
+        /* ══════════════════════════════════════════════════
+           DECEPTIVE PRICING BANNER
+           ══════════════════════════════════════════════════ */
+        #priceBanner {
+            display: none;
+            margin-bottom: 24px;
+            animation: slide-up-in 0.5s ease-out;
+        }
+
+        .banner-danger {
+            padding: 16px 20px;
+            border-radius: 12px;
+            background: var(--danger-dim);
+            border: 1px solid rgba(239, 68, 68, 0.2);
+            display: flex;
+            align-items: flex-start;
+            gap: 14px;
+        }
+
+        .banner-icon {
+            flex-shrink: 0;
+            width: 36px;
+            height: 36px;
+            border-radius: 10px;
+            background: rgba(239, 68, 68, 0.15);
+            border: 1px solid rgba(239, 68, 68, 0.2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .banner-icon svg {
+            width: 18px;
+            height: 18px;
+            stroke: var(--danger);
+        }
+
+        .banner-content h4 {
+            font-size: 13px;
+            font-weight: 700;
+            color: var(--danger);
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            margin-bottom: 4px;
+        }
+
+        .banner-content p {
+            font-size: 13px;
+            color: #fca5a5;
+            line-height: 1.6;
+            font-weight: 400;
+        }
+
+        /* ══════════════════════════════════════════════════
+           RESULTS CONTAINER
+           ══════════════════════════════════════════════════ */
+        #results {
+            display: none;
+        }
+
+        #results.visible {
+            display: block;
+            animation: fade-in 0.3s ease-out;
+        }
+
+        .result-card {
+            padding: 0;
+            margin-bottom: 24px;
+        }
+
+        /* ══════════════════════════════════════════════════
+           WINNER DASHBOARD
+           ══════════════════════════════════════════════════ */
+        .winner-header {
+            padding: 24px 28px 20px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .winner-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 6px 14px;
+            border-radius: 100px;
+            background: linear-gradient(90deg, rgba(0, 255, 102, 0.12), rgba(0, 255, 102, 0.25), rgba(0, 255, 102, 0.12));
+            background-size: 200% 100%;
+            animation: badge-shimmer 3s ease-in-out infinite;
+            border: 1px solid rgba(0, 255, 102, 0.2);
+            font-size: 11px;
+            font-weight: 700;
+            letter-spacing: 1.5px;
+            text-transform: uppercase;
+            color: var(--emerald);
+        }
+
+        .download-btn {
+            background: rgba(0, 243, 255, 0.1);
+            border: 1px solid rgba(0, 243, 255, 0.2);
+            color: var(--cyan);
+            padding: 4px 12px;
+            border-radius: 100px;
+            font-size: 11px;
+            font-weight: 600;
+            font-family: var(--font-primary);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .download-btn:hover {
+            background: rgba(0, 243, 255, 0.2);
+            box-shadow: 0 0 10px rgba(0, 243, 255, 0.2);
+        }
+
+        .source-tag {
+            font-size: 11px;
+            font-weight: 500;
+            color: var(--text-muted);
+            padding: 4px 12px;
+            border-radius: 100px;
+            background: var(--surface-dark);
+            border: 1px solid rgba(255, 255, 255, 0.04);
+            font-family: var(--font-mono);
+        }
+
+        .winner-body {
+            padding: 0 28px 24px;
+        }
+
+        .winner-title {
+            font-size: 22px;
+            font-weight: 800;
+            color: var(--text-primary);
+            line-height: 1.3;
+            margin-bottom: 6px;
+            letter-spacing: -0.3px;
+        }
+
+        .winner-price {
+            font-size: 32px;
+            font-weight: 900;
+            color: var(--cyan);
+            text-shadow: 0 0 25px rgba(0, 243, 255, 0.3);
+            margin-bottom: 20px;
+            font-family: var(--font-mono);
+            letter-spacing: -1px;
+        }
+
+        /* Specs Grid */
+        .specs-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(110px, 1fr));
+            gap: 10px;
+            margin-bottom: 24px;
+        }
+
+        .spec-box {
+            background: var(--surface-dark);
+            border: 1px solid rgba(255, 255, 255, 0.04);
+            border-radius: 10px;
+            padding: 14px 12px;
+            text-align: center;
+            transition: border-color 0.3s;
+        }
+
+        .spec-box:hover {
+            border-color: var(--border-hover);
+        }
+
+        .spec-label {
+            font-size: 10px;
+            font-weight: 600;
+            letter-spacing: 1.5px;
+            text-transform: uppercase;
+            color: var(--text-muted);
+            margin-bottom: 6px;
+        }
+
+        .spec-value {
+            font-size: 14px;
+            font-weight: 700;
+            color: var(--text-primary);
+        }
+
+        /* AI Verdict */
+        .verdict-box {
+            background: linear-gradient(135deg, rgba(0, 255, 102, 0.06), rgba(0, 243, 255, 0.04));
+            border: 1px solid rgba(0, 255, 102, 0.1);
+            border-left: 3px solid var(--emerald);
+            border-radius: 10px;
+            padding: 18px 20px;
+        }
+
+        .verdict-label {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 10px;
+            font-weight: 700;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            color: rgba(0, 255, 102, 0.7);
+            margin-bottom: 10px;
+        }
+
+        .verdict-label svg {
+            width: 16px;
+            height: 16px;
+            stroke: var(--emerald);
+        }
+
+        .verdict-text {
+            font-size: 14px;
+            color: var(--text-secondary);
+            line-height: 1.7;
+            font-weight: 400;
+        }
+
+        /* ══════════════════════════════════════════════════
+           PRICE HISTORY CHART
+           ══════════════════════════════════════════════════ */
+        .chart-card {
+            padding: 24px 28px;
+            margin-bottom: 24px;
+        }
+
+        .section-title {
+            font-size: 15px;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin-bottom: 18px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .section-title .icon-circle {
+            width: 28px;
+            height: 28px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: var(--cyan-dim);
+            border: 1px solid rgba(0, 243, 255, 0.1);
+        }
+
+        .section-title .icon-circle svg {
+            width: 14px;
+            height: 14px;
+            stroke: var(--cyan);
+        }
+
+        .chart-wrapper {
+            position: relative;
+            height: 220px;
+        }
+
+        .chart-wrapper canvas {
+            width: 100% !important;
+            height: 100% !important;
+        }
+
+        /* ══════════════════════════════════════════════════
+           COMPARISON MATRIX TABLE
+           ══════════════════════════════════════════════════ */
+        .table-card {
+            padding: 24px 28px;
+            margin-bottom: 24px;
+        }
+
+        .section-title-emerald .icon-circle {
+            background: var(--emerald-dim);
+            border: 1px solid rgba(0, 255, 102, 0.1);
+        }
+
+        .section-title-emerald .icon-circle svg {
+            stroke: var(--emerald);
+        }
+
+        .table-wrapper {
+            overflow-x: auto;
+            border-radius: 10px;
+            border: 1px solid rgba(255, 255, 255, 0.04);
+        }
+
+        .comparison-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 13px;
+        }
+
+        .comparison-table th {
+            padding: 14px 16px;
+            text-align: left;
+            font-size: 10px;
+            font-weight: 700;
+            letter-spacing: 1.5px;
+            text-transform: uppercase;
+            color: var(--text-muted);
+            background: var(--surface-dark);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+        }
+
+        .comparison-table td {
+            padding: 14px 16px;
+            color: var(--text-secondary);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+            font-weight: 400;
+            vertical-align: middle;
+        }
+
+        .comparison-table tbody tr {
+            transition: background 0.2s;
+        }
+
+        .comparison-table tbody tr:hover {
+            background: rgba(0, 243, 255, 0.02);
+        }
+
+        .comparison-table tbody tr:last-child td {
+            border-bottom: none;
+        }
+
+        .comparison-table td:first-child {
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .table-price {
+            color: var(--cyan);
+            font-weight: 700;
+            font-family: var(--font-mono);
+            font-size: 13px;
+        }
+
+        .table-rating {
+            color: #fbbf24;
+        }
+
+        /* ══════════════════════════════════════════════════
+           ERROR STATE
+           ══════════════════════════════════════════════════ */
+        #errorState {
+            display: none;
+            animation: slide-up-in 0.5s ease-out;
+        }
+
+        .error-card {
+            padding: 48px 28px;
+            text-align: center;
+        }
+
+        .error-icon-wrap {
+            width: 56px;
+            height: 56px;
+            border-radius: 16px;
+            background: var(--danger-dim);
+            border: 1px solid rgba(239, 68, 68, 0.15);
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 18px;
+        }
+
+        .error-icon-wrap svg {
+            width: 24px;
+            height: 24px;
+            stroke: var(--danger);
+        }
+
+        .error-title {
+            font-size: 17px;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin-bottom: 8px;
+        }
+
+        .error-message {
+            font-size: 13px;
+            color: var(--text-secondary);
+            margin-bottom: 24px;
+            max-width: 400px;
+            margin-left: auto;
+            margin-right: auto;
+            line-height: 1.6;
+        }
+
+        .retry-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 22px;
+            border-radius: 10px;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            background: rgba(255, 255, 255, 0.04);
+            color: var(--text-secondary);
+            font-family: var(--font-sans);
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .retry-btn:hover {
+            background: rgba(255, 255, 255, 0.08);
+            border-color: rgba(255, 255, 255, 0.15);
+            color: var(--text-primary);
+        }
+
+        .retry-btn svg {
+            width: 15px;
+            height: 15px;
+        }
+
+        /* ══════════════════════════════════════════════════
+           FOOTER
+           ══════════════════════════════════════════════════ */
+        .app-footer {
+            text-align: center;
+            padding: 32px 20px 0;
+            font-size: 11px;
+            color: var(--text-muted);
+            letter-spacing: 0.5px;
+        }
+
+        .app-footer a {
+            color: var(--cyan);
+            text-decoration: none;
+            opacity: 0.6;
+        }
+
+        /* ══════════════════════════════════════════════════
+           RESPONSIVE
+           ══════════════════════════════════════════════════ */
+        @media (max-width: 640px) {
+            .app-container {
+                padding: 24px 14px 40px;
+            }
+            .search-inner {
+                flex-direction: column;
+            }
+            .search-btn {
+                width: 100%;
+                padding: 14px;
+            }
+            .winner-body, .chart-card, .table-card {
+                padding-left: 18px;
+                padding-right: 18px;
+            }
+            .winner-header {
+                padding-left: 18px;
+                padding-right: 18px;
+            }
+            .winner-price {
+                font-size: 26px;
+            }
+            .specs-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        /* ══════════════════════════════════════════════════
+           ADVANCED FILTER DRAWER STYLES
+           ══════════════════════════════════════════════════ */
+        .filter-toggle-btn {
+            background: rgba(0, 243, 255, 0.08);
+            border: 1px solid rgba(0, 243, 255, 0.2);
+            color: var(--cyan);
+            padding: 12px 18px;
+            border-radius: 12px;
+            font-family: var(--font-sans);
+            font-size: 12px;
+            font-weight: 700;
+            letter-spacing: 1.2px;
+            text-transform: uppercase;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.3s cubic-bezier(0.22, 1, 0.36, 1);
+            position: relative;
+            flex-shrink: 0;
+        }
+
+        .filter-toggle-btn:hover {
+            background: rgba(0, 243, 255, 0.16);
+            border-color: rgba(0, 243, 255, 0.4);
+            box-shadow: 0 0 15px rgba(0, 243, 255, 0.2);
+        }
+
+        .filter-count-badge {
+            min-width: 18px;
+            height: 18px;
+            padding: 0 5px;
+            border-radius: 50px;
+            background: var(--emerald);
+            color: #000;
+            font-size: 10px;
+            font-weight: 800;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 0 8px var(--emerald);
+        }
+
+        .filter-drawer {
+            margin-top: 16px;
+            padding: 20px 24px;
+            animation: slide-up-in 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+            border: 1px solid rgba(0, 243, 255, 0.18);
+            border-radius: 16px;
+            background: var(--bg-card);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+        }
+
+        .filter-drawer-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 16px;
+            padding-bottom: 12px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+        }
+
+        .filter-drawer-title {
+            font-size: 13px;
+            font-weight: 800;
+            color: var(--text-primary);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .filter-clear-link {
+            background: transparent;
+            border: none;
+            color: var(--text-muted);
+            font-size: 11px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: color 0.2s;
+        }
+
+        .filter-clear-link:hover {
+            color: var(--danger);
+            text-decoration: underline;
+        }
+
+        .filter-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 16px;
+            margin-bottom: 20px;
+        }
+
+        .filter-group {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .filter-label {
+            font-size: 10px;
+            font-weight: 700;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .filter-range-inputs {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .range-dash {
+            color: var(--text-muted);
+            font-size: 12px;
+        }
+
+        .filter-input, .filter-select {
+            width: 100%;
+            background: rgba(8, 12, 20, 0.8);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 8px;
+            color: var(--text-primary);
+            font-family: var(--font-sans);
+            font-size: 13px;
+            padding: 10px 12px;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+
+        .filter-input:focus, .filter-select:focus {
+            border-color: var(--cyan);
+            box-shadow: 0 0 10px rgba(0, 243, 255, 0.15);
+        }
+
+        .filter-select option {
+            background: #090d16;
+            color: #f0f4f8;
+        }
+
+        .filter-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 12px;
+            padding-top: 14px;
+            border-top: 1px solid rgba(255, 255, 255, 0.06);
+        }
+
+        .filter-apply-btn {
+            background: linear-gradient(135deg, #00ff66, #00c8d6);
+            color: #000;
+            border: none;
+            border-radius: 10px;
+            padding: 11px 22px;
+            font-family: var(--font-sans);
+            font-size: 11px;
+            font-weight: 800;
+            letter-spacing: 1.5px;
+            text-transform: uppercase;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 4px 15px rgba(0, 255, 102, 0.2);
+        }
+
+        .filter-apply-btn:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 6px 20px rgba(0, 255, 102, 0.35);
+        }
+
+        /* ══════════════════════════════════════════════════
+           PDF REPORT TEMPLATE STYLES
+           ══════════════════════════════════════════════════ */
+        #pdfReportContainer {
+            position: absolute;
+            left: -9999px;
+            top: 0;
+            width: 790px;
+            background: #060913;
+            color: #f0f4f8;
+            font-family: 'Inter', system-ui, -apple-system, sans-serif;
+            padding: 0;
+            box-sizing: border-box;
+            display: none;
+        }
+
+        .pdf-header-bar {
+            height: 5px;
+            background: linear-gradient(90deg, #00f3ff, #00ff66, #a855f7);
+            border-top-left-radius: 12px;
+            border-top-right-radius: 12px;
+        }
+
+        .pdf-header {
+            padding: 24px 28px 18px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+            background: #0a0f1d;
+        }
+
+        .pdf-logo-title {
+            font-size: 24px;
+            font-weight: 900;
+            letter-spacing: -0.5px;
+        }
+
+        .pdf-logo-title .brand-cyan { color: #00f3ff; text-shadow: 0 0 10px rgba(0,243,255,0.4); }
+        .pdf-logo-title .brand-white { color: #ffffff; }
+
+        .pdf-subtitle {
+            font-size: 11px;
+            color: #8892a4;
+            letter-spacing: 0.5px;
+            margin-top: 3px;
+        }
+
+        .pdf-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 14px;
+            border-radius: 100px;
+            background: rgba(0, 243, 255, 0.1);
+            border: 1px solid rgba(0, 243, 255, 0.25);
+            color: #00f3ff;
+            font-size: 10px;
+            font-weight: 700;
+            letter-spacing: 1.5px;
+            text-transform: uppercase;
+        }
+
+        .pdf-body {
+            padding: 24px 28px;
+            background: #060913;
+        }
+
+        .pdf-query-banner {
+            background: linear-gradient(135deg, rgba(0, 243, 255, 0.08), rgba(0, 255, 102, 0.04));
+            border: 1px solid rgba(0, 243, 255, 0.15);
+            border-radius: 10px;
+            padding: 14px 18px;
+            margin-bottom: 22px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .pdf-query-label {
+            font-size: 10px;
+            font-weight: 700;
+            color: #8892a4;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            margin-bottom: 2px;
+        }
+
+        .pdf-query-text {
+            font-size: 16px;
+            font-weight: 800;
+            color: #00f3ff;
+        }
+
+        .pdf-section-title {
+            font-size: 12px;
+            font-weight: 800;
+            color: #ffffff;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+        }
+
+        .pdf-section-title .dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #00f3ff;
+            box-shadow: 0 0 8px #00f3ff;
+        }
+
+        .pdf-winner-box {
+            background: #0e172a;
+            border: 1px solid rgba(0, 255, 102, 0.25);
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 22px;
+        }
+
+        .pdf-winner-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 14px;
+            gap: 16px;
+        }
+
+        .pdf-winner-title {
+            font-size: 18px;
+            font-weight: 800;
+            color: #ffffff;
+            line-height: 1.35;
+            flex: 1;
+        }
+
+        .pdf-winner-price {
+            font-size: 26px;
+            font-weight: 900;
+            color: #00f3ff;
+            font-family: 'JetBrains Mono', monospace;
+            white-space: nowrap;
+            text-shadow: 0 0 15px rgba(0,243,255,0.3);
+        }
+
+        .pdf-specs-row {
+            display: flex;
+            gap: 10px;
+            margin-top: 14px;
+        }
+
+        .pdf-spec-item {
+            flex: 1;
+            background: #060a14;
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            border-radius: 8px;
+            padding: 10px;
+            text-align: center;
+        }
+
+        .pdf-spec-lbl {
+            font-size: 9px;
+            color: #8892a4;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+
+        .pdf-spec-val {
+            font-size: 13px;
+            font-weight: 700;
+            color: #f0f4f8;
+        }
+
+        .pdf-verdict-box {
+            background: linear-gradient(135deg, rgba(0, 255, 102, 0.08), rgba(0, 243, 255, 0.03));
+            border-left: 4px solid #00ff66;
+            border-radius: 8px;
+            padding: 16px 18px;
+            margin-bottom: 22px;
+        }
+
+        .pdf-verdict-lbl {
+            font-size: 10px;
+            font-weight: 800;
+            color: #00ff66;
+            letter-spacing: 1.5px;
+            text-transform: uppercase;
+            margin-bottom: 6px;
+        }
+
+        .pdf-verdict-txt {
+            font-size: 12px;
+            color: #cbd5e1;
+            line-height: 1.6;
+        }
+
+        .pdf-warning-box {
+            background: rgba(239, 68, 68, 0.12);
+            border: 1px solid rgba(239, 68, 68, 0.35);
+            border-left: 4px solid #ef4444;
+            border-radius: 8px;
+            padding: 16px 18px;
+            margin-bottom: 22px;
+        }
+
+        .pdf-warning-title {
+            font-size: 11px;
+            font-weight: 800;
+            color: #ef4444;
+            text-transform: uppercase;
+            letter-spacing: 1.2px;
+            margin-bottom: 4px;
+        }
+
+        .pdf-warning-txt {
+            font-size: 12px;
+            color: #fca5a5;
+            line-height: 1.5;
+        }
+
+        .pdf-chart-container {
+            background: #0e172a;
+            border: 1px solid rgba(0, 243, 255, 0.15);
+            border-radius: 12px;
+            padding: 18px;
+            margin-bottom: 22px;
+            text-align: center;
+        }
+
+        .pdf-chart-img {
+            width: 100%;
+            max-height: 200px;
+            object-fit: contain;
+            border-radius: 8px;
+            margin-top: 8px;
+        }
+
+        .pdf-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 11px;
+            background: #0e172a;
+            border-radius: 10px;
+            overflow: hidden;
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            margin-bottom: 22px;
+        }
+
+        .pdf-table th {
+            background: #141e33;
+            color: #00f3ff;
+            text-transform: uppercase;
+            font-size: 9px;
+            letter-spacing: 1.2px;
+            padding: 11px 14px;
+            text-align: left;
+            border-bottom: 1px solid rgba(0, 243, 255, 0.18);
+        }
+
+        .pdf-table td {
+            padding: 11px 14px;
+            color: #cbd5e1;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+        }
+
+        .pdf-table tr:last-child td {
+            border-bottom: none;
+        }
+
+        .pdf-table .price-cell {
+            color: #00f3ff;
+            font-weight: 700;
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        .pdf-footer {
+            padding: 18px 28px 24px;
+            border-top: 1px solid rgba(255, 255, 255, 0.08);
+            background: #0a0f1d;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 10px;
+            color: #64748b;
+        }
+
+        .pdf-footer-brand {
+            color: #00f3ff;
+            font-weight: 700;
+        }
+    </style>
+</head>
+<body>
+
+<div class="app-container">
+
+    <!-- ═══ HEADER ═══ -->
+    <header class="header">
+        <div class="header-badge">
+            <span class="dot"></span>
+            Neural Engine Online
+        </div>
+        <h1>
+            <span class="brand-glow">ValueScout</span>
+            <span class="brand-white"> AI</span>
+        </h1>
+        <p class="subtitle">by SANJU L. <span>|</span> Cross-Platform E-Commerce Comparator</p>
+    </header>
+
+    <!-- ═══ SEARCH ═══ -->
+    <div class="search-section">
+        <div class="glass-card search-card float">
+            <div class="search-inner">
+                <div class="search-icon-wrap">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3" stroke-linecap="round"/></svg>
+                </div>
+                <input
+                    type="text"
+                    id="searchInput"
+                    class="search-input"
+                    placeholder="Search any product... e.g. iPhone 15 128GB"
+                    onkeydown="if(event.key==='Enter')performSearch()"
+                    autocomplete="off"
+                >
+                <button class="filter-toggle-btn" id="filterToggleBtn" onclick="toggleFilterDrawer()" title="Custom Filters">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" style="width:15px;height:15px;"><path stroke-linecap="round" stroke-linejoin="round" d="M10.5 6h9.75M10.5 6a1.5 1.5 0 1 1-3 0m3 0a1.5 1.5 0 1 0-3 0M3.75 6H7.5m3 12h9.75m-9.75 0a1.5 1.5 0 1 1-3 0m3 0a1.5 1.5 0 1 0-3 0m-3.75 0H7.5m9-6h3.75m-3.75 0a1.5 1.5 0 1 1-3 0m3 0a1.5 1.5 0 1 0-3 0m-9.75 0h9.75"/></svg>
+                    <span>FILTERS</span>
+                    <span class="filter-count-badge" id="activeFilterBadge" style="display:none;">0</span>
+                </button>
+                <button class="search-btn" id="searchBtn" onclick="performSearch()">
+                    INITIALIZE SCAN
+                </button>
+            </div>
+        </div>
+
+        <!-- ═══ ADVANCED FILTER DRAWER ═══ -->
+        <div class="filter-drawer" id="filterDrawer" style="display: none;">
+            <div class="filter-drawer-header">
+                <div class="filter-drawer-title">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" style="width: 16px; height: 16px; color: var(--cyan);"><path stroke-linecap="round" stroke-linejoin="round" d="M10.5 6h9.75M10.5 6a1.5 1.5 0 1 1-3 0m3 0a1.5 1.5 0 1 0-3 0M3.75 6H7.5m3 12h9.75m-9.75 0a1.5 1.5 0 1 1-3 0m3 0a1.5 1.5 0 1 0-3 0m-3.75 0H7.5m9-6h3.75m-3.75 0a1.5 1.5 0 1 1-3 0m3 0a1.5 1.5 0 1 0-3 0m-9.75 0h9.75"/></svg>
+                    Advanced Custom Filters
+                </div>
+                <button class="filter-clear-link" onclick="resetFilters()">Reset All</button>
+            </div>
+
+            <div class="filter-grid">
+                <!-- Price Range -->
+                <div class="filter-group">
+                    <label class="filter-label">Price Range (₹)</label>
+                    <div class="filter-range-inputs">
+                        <input type="number" id="filterMinPrice" placeholder="Min ₹" min="0" step="500" class="filter-input" oninput="updateActiveFilterCount()">
+                        <span class="range-dash">—</span>
+                        <input type="number" id="filterMaxPrice" placeholder="Max ₹" min="0" step="500" class="filter-input" oninput="updateActiveFilterCount()">
+                    </div>
+                </div>
+
+                <!-- Condition / Model -->
+                <div class="filter-group">
+                    <label class="filter-label">Item Condition</label>
+                    <select id="filterCondition" class="filter-select" onchange="updateActiveFilterCount()">
+                        <option value="any">Any Condition (All)</option>
+                        <option value="new">New Only</option>
+                        <option value="used">Used / Refurbished Only</option>
+                    </select>
+                </div>
+
+                <!-- Delivery Speed / Time -->
+                <div class="filter-group">
+                    <label class="filter-label">Delivery Time & Cost</label>
+                    <select id="filterDelivery" class="filter-select" onchange="updateActiveFilterCount()">
+                        <option value="any">Any Delivery</option>
+                        <option value="free">Free Delivery Only</option>
+                        <option value="express">Express Delivery</option>
+                    </select>
+                </div>
+
+                <!-- Minimum Rating -->
+                <div class="filter-group">
+                    <label class="filter-label">Minimum Rating</label>
+                    <select id="filterRating" class="filter-select" onchange="updateActiveFilterCount()">
+                        <option value="any">Any Rating</option>
+                        <option value="3.5">3.5+ ⭐</option>
+                        <option value="4.0">4.0+ ⭐</option>
+                        <option value="4.5">4.5+ ⭐</option>
+                    </select>
+                </div>
+
+                <!-- Target Platform -->
+                <div class="filter-group">
+                    <label class="filter-label">Target Platform</label>
+                    <select id="filterPlatform" class="filter-select" onchange="updateActiveFilterCount()">
+                        <option value="any">All Platforms</option>
+                        <option value="amazon">Amazon</option>
+                        <option value="flipkart">Flipkart</option>
+                        <option value="croma">Croma</option>
+                        <option value="olx">OLX</option>
+                        <option value="reliance">Reliance Digital</option>
+                        <option value="tata">Tata CLiQ</option>
+                        <option value="vijay">Vijay Sales</option>
+                        <option value="jiomart">JioMart</option>
+                        <option value="meesho">Meesho</option>
+                    </select>
+                </div>
+
+                <!-- Sorting Order -->
+                <div class="filter-group">
+                    <label class="filter-label">Sort Listings By</label>
+                    <select id="filterSortBy" class="filter-select" onchange="updateActiveFilterCount()">
+                        <option value="optimal">🏆 Best Value (AI Score)</option>
+                        <option value="price_asc">Price: Low to High</option>
+                        <option value="price_desc">Price: High to Low</option>
+                        <option value="rating_desc">Rating: Highest First</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="filter-actions">
+                <button class="filter-apply-btn" onclick="applyCustomFilters(true)">
+                    APPLY FILTERS & RE-SCAN
+                </button>
+            </div>
+        </div>
+
+        <p class="search-hint">Powered by AI <span>•</span> Real-time web scraping <span>•</span> Multi-platform analysis</p>
+    </div>
+
+    <!-- ═══ LOADER ═══ -->
+    <div id="loader">
+        <div class="loader-ring-system">
+            <div class="loader-ring loader-ring-outer"></div>
+            <div class="loader-ring loader-ring-mid"></div>
+            <div class="loader-ring loader-ring-inner"></div>
+            <div class="loader-orbit-dot primary"><span class="dot"></span></div>
+            <div class="loader-orbit-dot secondary"><span class="dot"></span></div>
+            <div class="loader-core-icon">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M2 12a10 10 0 1 0 20 0 10 10 0 0 0-20 0Zm10-4v4l3 3"/></svg>
+            </div>
+        </div>
+        <p class="loader-text">Bypassing mainframes... normalizing datasets...</p>
+        <div class="loader-bar"><div class="loader-bar-fill"></div></div>
+    </div>
+
+    <!-- ═══ ERROR STATE ═══ -->
+    <div id="errorState">
+        <div class="glass-card error-card float">
+            <div class="error-icon-wrap">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+            </div>
+            <div class="error-title">Analysis Failed</div>
+            <p class="error-message" id="errorMessage">Something went wrong. Please check your connection and try again.</p>
+            <button class="retry-btn" onclick="resetUI()">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>
+                Try Again
+            </button>
+        </div>
+    </div>
+
+    <!-- ═══ DECEPTIVE PRICING BANNER ═══ -->
+    <div id="priceBanner">
+        <div class="banner-danger">
+            <div class="banner-icon">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v4m0 4h.01M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0Z"/></svg>
+            </div>
+            <div class="banner-content">
+                <h4>⚠ Deceptive Pricing Detected</h4>
+                <p id="priceWarningText">Price manipulation warning details will appear here.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- ═══ RESULTS ═══ -->
+    <div id="results">
+
+        <!-- Winner Dashboard -->
+        <div class="glass-card result-card float" style="animation-delay: 0s;">
+            <div class="winner-header">
+                <span class="winner-badge">🏆 Optimal Value Detected</span>
+                <div style="display: flex; gap: 10px; align-items: center;">
+                    <button class="download-btn" onclick="downloadReport()" title="Download Summary Report">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" style="width: 12px; height: 12px;"><path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75V16.5M16.5 12 12 16.5m0 0L7.5 12m4.5 4.5V3"/></svg>
+                        Report
+                    </button>
+                    <span class="source-tag" id="dataSource"></span>
+                </div>
+            </div>
+            <div class="winner-body">
+                <div class="winner-title" id="productTitle"></div>
+                <div class="winner-price" id="productPrice"></div>
+
+                <div class="specs-grid">
+                    <div class="spec-box">
+                        <div class="spec-label">Platform</div>
+                        <div class="spec-value" id="specPlatform">—</div>
+                    </div>
+                    <div class="spec-box">
+                        <div class="spec-label">Condition</div>
+                        <div class="spec-value" id="specCondition">—</div>
+                    </div>
+                    <div class="spec-box">
+                        <div class="spec-label">Rating</div>
+                        <div class="spec-value" id="specRating">—</div>
+                    </div>
+                    <div class="spec-box">
+                        <div class="spec-label">Warranty</div>
+                        <div class="spec-value" id="specWarranty">—</div>
+                    </div>
+                    <div class="spec-box">
+                        <div class="spec-label">Delivery</div>
+                        <div class="spec-value" id="specDelivery">—</div>
+                    </div>
+                </div>
+
+                <div class="verdict-box">
+                    <div class="verdict-label">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M9.663 17h4.674M12 3v1m6.364 1.636-.707.707M21 12h-1M4 12H3m3.343-5.657-.707-.707m2.828 9.9a5 5 0 1 1 7.072 0l-.548.547A3.374 3.374 0 0 0 14 18.469V19a2 2 0 1 1-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547Z"/></svg>
+                        AI Verdict
+                    </div>
+                    <p class="verdict-text" id="aiVerdict"></p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Price History Chart -->
+        <div class="glass-card chart-card float-delayed">
+            <div class="section-title">
+                <span class="icon-circle">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M3 3v18h18"/><path stroke-linecap="round" stroke-linejoin="round" d="m19 9-5 5-4-4-3 3"/></svg>
+                </span>
+                6-Month Price Trajectory
+            </div>
+            <div class="chart-wrapper">
+                <canvas id="priceChart"></canvas>
+            </div>
+        </div>
+
+        <!-- Comparison Matrix -->
+        <div class="glass-card table-card float-slow">
+            <div class="section-title section-title-emerald">
+                <span class="icon-circle">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+                </span>
+                Cross-Platform Comparison Matrix
+            </div>
+            <div class="table-wrapper">
+                <table class="comparison-table" id="comparisonTable">
+                    <thead>
+                        <tr>
+                            <th>Platform</th>
+                            <th>Price</th>
+                            <th>Condition</th>
+                            <th>Rating</th>
+                            <th>Warranty</th>
+                            <th>Delivery</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tableBody"></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- ═══ FOOTER ═══ -->
+    <div class="app-footer">
+        Built with neural precision · ValueScout AI © 2026
+    </div>
+</div>
+
+<!-- ═══ HIDDEN PDF REPORT TEMPLATE ═══ -->
+<div id="pdfReportContainer">
+    <div class="pdf-header-bar"></div>
+    <div class="pdf-header">
+        <div>
+            <div class="pdf-logo-title">
+                <span class="brand-cyan">VALUESCOUT</span><span class="brand-white"> AI</span>
+            </div>
+            <div class="pdf-subtitle">Neural E-Commerce Analytics & Anomaly Intelligence Report</div>
+        </div>
+        <div class="pdf-badge">
+            ⚡ OFFICIAL REPORT
+        </div>
+    </div>
+
+    <div class="pdf-body">
+        <!-- Target Query -->
+        <div class="pdf-query-banner">
+            <div>
+                <div class="pdf-query-label">Target Product Scan Query</div>
+                <div class="pdf-query-text" id="pdfQueryText">—</div>
+            </div>
+            <div style="font-size: 10px; color: #8892a4; text-align: right;" id="pdfTimestamp">—</div>
+        </div>
+
+        <!-- Winner Card -->
+        <div class="pdf-winner-box">
+            <div class="pdf-section-title">
+                <span class="dot"></span> 🏆 Optimal Value Deal Winner
+            </div>
+            <div class="pdf-winner-top">
+                <div class="pdf-winner-title" id="pdfWinnerTitle">—</div>
+                <div class="pdf-winner-price" id="pdfWinnerPrice">—</div>
+            </div>
+            <div class="pdf-specs-row">
+                <div class="pdf-spec-item">
+                    <div class="pdf-spec-lbl">Platform</div>
+                    <div class="pdf-spec-val" id="pdfSpecPlatform">—</div>
+                </div>
+                <div class="pdf-spec-item">
+                    <div class="pdf-spec-lbl">Condition</div>
+                    <div class="pdf-spec-val" id="pdfSpecCondition">—</div>
+                </div>
+                <div class="pdf-spec-item">
+                    <div class="pdf-spec-lbl">Rating</div>
+                    <div class="pdf-spec-val" id="pdfSpecRating">—</div>
+                </div>
+                <div class="pdf-spec-item">
+                    <div class="pdf-spec-lbl">Warranty</div>
+                    <div class="pdf-spec-val" id="pdfSpecWarranty">—</div>
+                </div>
+                <div class="pdf-spec-item">
+                    <div class="pdf-spec-lbl">Delivery</div>
+                    <div class="pdf-spec-val" id="pdfSpecDelivery">—</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- AI Verdict -->
+        <div class="pdf-verdict-box">
+            <div class="pdf-verdict-lbl">🧠 Neural AI Verdict & Synthesis</div>
+            <div class="pdf-verdict-txt" id="pdfVerdictTxt">—</div>
+        </div>
+
+        <!-- Deceptive Warning Banner -->
+        <div class="pdf-warning-box" id="pdfWarningBox" style="display: none;">
+            <div class="pdf-warning-title">⚠ Deceptive Pricing Manipulation Warning</div>
+            <div class="pdf-warning-txt" id="pdfWarningTxt">—</div>
+        </div>
+
+        <!-- Price History Chart Image -->
+        <div class="pdf-chart-container" id="pdfChartContainer">
+            <div class="pdf-section-title" style="margin-bottom: 8px;">
+                <span class="dot" style="background:#00ff66; box-shadow:0 0 8px #00ff66;"></span> 📈 6-Month Price Trajectory Analysis
+            </div>
+            <img id="pdfChartImg" class="pdf-chart-img" alt="Price Trajectory Chart" />
+        </div>
+
+        <!-- Comparison Table -->
+        <div class="pdf-section-title">
+            <span class="dot"></span> 📊 Cross-Platform Comparison Matrix
+        </div>
+        <table class="pdf-table">
+            <thead>
+                <tr>
+                    <th>Platform</th>
+                    <th>Price</th>
+                    <th>Condition</th>
+                    <th>Rating</th>
+                    <th>Warranty</th>
+                    <th>Delivery</th>
+                </tr>
+            </thead>
+            <tbody id="pdfTableBody"></tbody>
+        </table>
+    </div>
+
+    <div class="pdf-footer">
+        <div>Generated by <span class="pdf-footer-brand">ValueScout AI Engine</span> © 2026</div>
+        <div>Neural ID: #VS-2026-REPORT • Authenticated Analytics</div>
+    </div>
+</div>
+
+<script>
+    /* ══════════════════════════════════════════════════
+       STATE & CHART INSTANCE
+       ══════════════════════════════════════════════════ */
+    let priceChartInstance = null;
+    let currentAnalysis = null;
+    let originalAnalysis = null;
+
+    const API_BASE = 'http://127.0.0.1:8000';
+
+    /* ══════════════════════════════════════════════════
+       FILTER DRAWER TOGGLE & ENGINE
+       ══════════════════════════════════════════════════ */
+    function toggleFilterDrawer() {
+        const drawer = document.getElementById('filterDrawer');
+        if (drawer.style.display === 'none' || !drawer.style.display) {
+            drawer.style.display = 'block';
+        } else {
+            drawer.style.display = 'none';
+        }
+    }
+
+    function parsePriceNumber(str) {
+        if (!str) return 0;
+        const cleaned = String(str).replace(/[^0-9.]/g, '');
+        return parseFloat(cleaned) || 0;
+    }
+
+    function updateActiveFilterCount() {
+        const minPrice = document.getElementById('filterMinPrice').value;
+        const maxPrice = document.getElementById('filterMaxPrice').value;
+        const condition = document.getElementById('filterCondition').value;
+        const delivery = document.getElementById('filterDelivery').value;
+        const rating = document.getElementById('filterRating').value;
+        const platform = document.getElementById('filterPlatform').value;
+        const sortBy = document.getElementById('filterSortBy').value;
+
+        let count = 0;
+        if (minPrice) count++;
+        if (maxPrice) count++;
+        if (condition !== 'any') count++;
+        if (delivery !== 'any') count++;
+        if (rating !== 'any') count++;
+        if (platform !== 'any') count++;
+        if (sortBy !== 'optimal') count++;
+
+        const badge = document.getElementById('activeFilterBadge');
+        if (count > 0) {
+            badge.innerText = count;
+            badge.style.display = 'inline-flex';
+        } else {
+            badge.style.display = 'none';
+        }
+
+        // Live client-side filtering if results are active
+        if (originalAnalysis) {
+            applyCustomFilters(false);
+        }
+    }
+
+    function resetFilters() {
+        document.getElementById('filterMinPrice').value = '';
+        document.getElementById('filterMaxPrice').value = '';
+        document.getElementById('filterCondition').value = 'any';
+        document.getElementById('filterDelivery').value = 'any';
+        document.getElementById('filterRating').value = 'any';
+        document.getElementById('filterPlatform').value = 'any';
+        document.getElementById('filterSortBy').value = 'optimal';
+        updateActiveFilterCount();
+        if (originalAnalysis) {
+            currentAnalysis = originalAnalysis;
+            renderAnalysisUI(originalAnalysis);
+        }
+    }
+
+    function applyCustomFilters(triggerScanIfEmpty = false) {
+        if (!originalAnalysis) {
+            if (triggerScanIfEmpty) performSearch();
+            return;
+        }
+
+        const minPrice = parseFloat(document.getElementById('filterMinPrice').value) || 0;
+        const maxPrice = parseFloat(document.getElementById('filterMaxPrice').value) || Infinity;
+        const condition = document.getElementById('filterCondition').value.toLowerCase();
+        const delivery = document.getElementById('filterDelivery').value.toLowerCase();
+        const minRating = parseFloat(document.getElementById('filterRating').value) || 0;
+        const targetPlatform = document.getElementById('filterPlatform').value.toLowerCase();
+        const sortBy = document.getElementById('filterSortBy').value;
+
+        let filteredOptions = (originalAnalysis.compared_options || []).filter(opt => {
+            const pVal = parsePriceNumber(opt.price);
+            if (pVal > 0 && pVal < minPrice) return false;
+            if (pVal > 0 && maxPrice !== Infinity && pVal > maxPrice) return false;
+
+            if (condition !== 'any') {
+                const optCond = (opt.condition || '').toLowerCase();
+                if (condition === 'new' && optCond.includes('used')) return false;
+                if (condition === 'used' && !optCond.includes('used') && !optCond.includes('refurbished')) return false;
+            }
+
+            if (delivery !== 'any') {
+                const optDeliv = (opt.delivery || '').toLowerCase();
+                if (delivery === 'free' && !optDeliv.includes('free')) return false;
+                if (delivery === 'express' && !optDeliv.includes('express') && !optDeliv.includes('fast')) return false;
+            }
+
+            if (minRating > 0) {
+                const rVal = parseFloat(opt.rating) || 0;
+                if (rVal < minRating) return false;
+            }
+
+            if (targetPlatform !== 'any') {
+                const pName = (opt.platform || '').toLowerCase();
+                if (!pName.includes(targetPlatform)) return false;
+            }
+
+            return true;
+        });
+
+        // Sorting
+        if (sortBy === 'price_asc') {
+            filteredOptions.sort((a, b) => parsePriceNumber(a.price) - parsePriceNumber(b.price));
+        } else if (sortBy === 'price_desc') {
+            filteredOptions.sort((a, b) => parsePriceNumber(b.price) - parsePriceNumber(a.price));
+        } else if (sortBy === 'rating_desc') {
+            filteredOptions.sort((a, b) => (parseFloat(b.rating) || 0) - (parseFloat(a.rating) || 0));
+        }
+
+        let workingAnalysis = { ...originalAnalysis, compared_options: filteredOptions };
+
+        if (filteredOptions.length > 0) {
+            const winnerItem = filteredOptions[0];
+            workingAnalysis.winner_title = winnerItem.title || originalAnalysis.winner_title;
+            workingAnalysis.winner_platform = winnerItem.platform || originalAnalysis.winner_platform;
+            workingAnalysis.winner_price = winnerItem.price || originalAnalysis.winner_price;
+            workingAnalysis.winner_condition = winnerItem.condition || originalAnalysis.winner_condition;
+            workingAnalysis.winner_rating = winnerItem.rating || originalAnalysis.winner_rating;
+            workingAnalysis.winner_warranty = winnerItem.warranty || originalAnalysis.winner_warranty;
+            workingAnalysis.winner_delivery = winnerItem.delivery || originalAnalysis.winner_delivery;
+        }
+
+        currentAnalysis = workingAnalysis;
+        renderAnalysisUI(workingAnalysis);
+    }
+
+    /* ══════════════════════════════════════════════════
+       RENDER ANALYSIS UI
+       ══════════════════════════════════════════════════ */
+    function renderAnalysisUI(analysis) {
+        // ── Populate Winner Dashboard ──
+        document.getElementById('productTitle').innerText = analysis.winner_title || 'Unknown Product';
+        document.getElementById('productPrice').innerText = analysis.winner_price || 'N/A';
+        document.getElementById('specPlatform').innerText = analysis.winner_platform || '—';
+        document.getElementById('specCondition').innerText = analysis.winner_condition || '—';
+
+        let ratingDisplay = analysis.winner_rating || '—';
+        if (ratingDisplay !== '—' && !ratingDisplay.includes('⭐')) ratingDisplay += ' ⭐';
+        document.getElementById('specRating').innerText = ratingDisplay;
+
+        document.getElementById('specWarranty').innerText = analysis.winner_warranty || '—';
+        document.getElementById('specDelivery').innerText = analysis.winner_delivery || '—';
+        document.getElementById('aiVerdict').innerText = analysis.verdict || 'No verdict available.';
+        document.getElementById('dataSource').innerText = `src: ${analysis.source || 'AI'}`;
+
+        // ── Deceptive Pricing Banner ──
+        const priceBanner = document.getElementById('priceBanner');
+        if (analysis.is_fake_discount) {
+            document.getElementById('priceWarningText').innerText = analysis.price_warning || 'Price anomaly detected.';
+            priceBanner.style.display = 'block';
+        } else {
+            priceBanner.style.display = 'none';
+        }
+
+        // ── Price History Chart ──
+        if (analysis.price_history) {
+            renderChart(analysis.price_history);
+        }
+
+        // ── Comparison Table ──
+        const tableBody = document.getElementById('tableBody');
+        tableBody.innerHTML = '';
+
+        if (analysis.compared_options && analysis.compared_options.length > 0) {
+            analysis.compared_options.forEach(opt => {
+                const tr = document.createElement('tr');
+                let rating = opt.rating || '—';
+                if (rating !== '—' && !rating.includes('⭐')) rating += ' ⭐';
+
+                tr.innerHTML = `
+                    <td>${opt.platform || '—'}</td>
+                    <td class="table-price">${opt.price || '—'}</td>
+                    <td>${opt.condition || '—'}</td>
+                    <td class="table-rating">${rating}</td>
+                    <td>${opt.warranty || '—'}</td>
+                    <td>${opt.delivery || '—'}</td>
+                `;
+                tableBody.appendChild(tr);
+            });
+        } else {
+            tableBody.innerHTML = `
+                <tr>
+                    <td colspan="6" style="text-align:center; padding: 24px; color: var(--text-muted);">
+                        ⚠️ No marketplace options matched your active custom filters.<br>
+                        <button onclick="resetFilters()" style="margin-top:10px; background: rgba(0,243,255,0.1); border: 1px solid rgba(0,243,255,0.3); color: var(--cyan); padding: 6px 14px; border-radius: 8px; cursor: pointer;">Reset Filters</button>
+                    </td>
+                </tr>
+            `;
+        }
+
+        // Show results container
+        document.getElementById('results').classList.add('visible');
+    }
+
+    /* ══════════════════════════════════════════════════
+       RESET UI
+       ══════════════════════════════════════════════════ */
+    function resetUI() {
+        document.getElementById('loader').style.display = 'none';
+        document.getElementById('results').classList.remove('visible');
+        document.getElementById('errorState').style.display = 'none';
+        document.getElementById('priceBanner').style.display = 'none';
+        document.getElementById('searchInput').value = '';
+        document.getElementById('searchBtn').disabled = false;
+        document.getElementById('searchInput').focus();
+    }
+
+    /* ══════════════════════════════════════════════════
+       PERFORM SEARCH (Core Logic)
+       ══════════════════════════════════════════════════ */
+    async function performSearch() {
+        const query = document.getElementById('searchInput').value.trim();
+        if (!query) return;
+
+        const loader = document.getElementById('loader');
+        const results = document.getElementById('results');
+        const errorState = document.getElementById('errorState');
+        const priceBanner = document.getElementById('priceBanner');
+        const searchBtn = document.getElementById('searchBtn');
+
+        // Reset states
+        loader.style.display = 'flex';
+        results.classList.remove('visible');
+        errorState.style.display = 'none';
+        priceBanner.style.display = 'none';
+        searchBtn.disabled = true;
+
+        // Build API URL with filter parameters
+        let url = `${API_BASE}/analyze?query=${encodeURIComponent(query)}`;
+        const minPrice = document.getElementById('filterMinPrice').value;
+        const maxPrice = document.getElementById('filterMaxPrice').value;
+        const condition = document.getElementById('filterCondition').value;
+        const delivery = document.getElementById('filterDelivery').value;
+        const minRating = document.getElementById('filterRating').value;
+        const sortBy = document.getElementById('filterSortBy').value;
+
+        if (minPrice) url += `&min_price=${encodeURIComponent(minPrice)}`;
+        if (maxPrice) url += `&max_price=${encodeURIComponent(maxPrice)}`;
+        if (condition !== 'any') url += `&condition=${encodeURIComponent(condition)}`;
+        if (delivery !== 'any') url += `&delivery=${encodeURIComponent(delivery)}`;
+        if (minRating !== 'any') url += `&min_rating=${encodeURIComponent(minRating)}`;
+        if (sortBy !== 'optimal') url += `&sort_by=${encodeURIComponent(sortBy)}`;
+
+        try {
+            const response = await fetch(url);
+
+            if (!response.ok) {
+                throw new Error(`Server responded with ${response.status}`);
+            }
+
+            const data = await response.json();
+
+            if (data.error) {
+                throw new Error(data.error);
+            }
+
+            // Hide loader
+            loader.style.display = 'none';
+
+            const analysis = data.analysis_data;
+            analysis.source = data.source || 'AI';
+            originalAnalysis = analysis;
+            currentAnalysis = analysis;
+
+            // Apply any active client-side filters / render UI
+            applyCustomFilters(false);
+
+        } catch (err) {
+            loader.style.display = 'none';
+            document.getElementById('errorMessage').innerText = err.message || 'Failed to analyze product. Please try again.';
+            errorState.style.display = 'block';
+        } finally {
+            searchBtn.disabled = false;
+        }
+    }
+
+    /* ══════════════════════════════════════════════════
+       RENDER CHART.JS LINE GRAPH
+       ══════════════════════════════════════════════════ */
+    function renderChart(priceHistory) {
+        const ctx = document.getElementById('priceChart').getContext('2d');
+
+        if (priceChartInstance) {
+            priceChartInstance.destroy();
+        }
+
+        const labels = Object.keys(priceHistory);
+        const dataPoints = Object.values(priceHistory);
+
+        priceChartInstance = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels,
+                datasets: [{
+                    label: 'Price (₹)',
+                    data: dataPoints,
+                    borderColor: '#00f3ff',
+                    backgroundColor: 'rgba(0, 243, 255, 0.05)',
+                    borderWidth: 2.5,
+                    pointBackgroundColor: '#00f3ff',
+                    pointBorderColor: '#050505',
+                    pointBorderWidth: 2,
+                    pointRadius: 5,
+                    pointHoverRadius: 8,
+                    pointHoverBackgroundColor: '#00f3ff',
+                    pointHoverBorderColor: '#fff',
+                    fill: true,
+                    tension: 0.35,
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                interaction: {
+                    intersect: false,
+                    mode: 'index',
+                },
+                plugins: {
+                    legend: { display: false },
+                    tooltip: {
+                        backgroundColor: 'rgba(8, 12, 20, 0.95)',
+                        titleColor: '#00f3ff',
+                        bodyColor: '#f0f4f8',
+                        borderColor: 'rgba(0, 243, 255, 0.15)',
+                        borderWidth: 1,
+                        padding: 12,
+                        cornerRadius: 8,
+                        titleFont: { family: "'JetBrains Mono', monospace", weight: '600', size: 12 },
+                        bodyFont: { family: "'Inter', sans-serif", size: 13 },
+                        callbacks: {
+                            label: (ctx) => `₹${ctx.parsed.y.toLocaleString('en-IN')}`
+                        }
+                    }
+                },
+                scales: {
+                    x: {
+                        grid: { color: 'rgba(255,255,255,0.03)', drawBorder: false },
+                        ticks: {
+                            color: '#4a5568',
+                            font: { family: "'Inter', sans-serif", size: 11, weight: '500' },
+                        }
+                    },
+                    y: {
+                        grid: { color: 'rgba(255,255,255,0.03)', drawBorder: false },
+                        ticks: {
+                            color: '#4a5568',
+                            font: { family: "'JetBrains Mono', monospace", size: 11 },
+                            callback: (val) => '₹' + val.toLocaleString('en-IN')
+                        }
+                    }
+                }
+            }
+        });
+    }
+
+    /* ══════════════════════════════════════════════════
+       INIT — Focus search on page load
+       ══════════════════════════════════════════════════ */
+    window.addEventListener('DOMContentLoaded', () => {
+        document.getElementById('searchInput').focus();
+    });
+
+    /* ══════════════════════════════════════════════════
+       POPULATE PDF TEMPLATE
+       ══════════════════════════════════════════════════ */
+    function populatePdfTemplate(analysis) {
+        const query = document.getElementById('searchInput').value.trim() || 'Product Query';
+        document.getElementById('pdfQueryText').innerText = query;
+        
+        const now = new Date();
+        const dateStr = now.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+        const timeStr = now.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
+        document.getElementById('pdfTimestamp').innerText = `${dateStr} • ${timeStr}`;
+
+        document.getElementById('pdfWinnerTitle').innerText = analysis.winner_title || 'Unknown Product';
+        document.getElementById('pdfWinnerPrice').innerText = analysis.winner_price || 'N/A';
+        document.getElementById('pdfSpecPlatform').innerText = analysis.winner_platform || '—';
+        document.getElementById('pdfSpecCondition').innerText = analysis.winner_condition || '—';
+
+        let ratingDisplay = analysis.winner_rating || '—';
+        if (ratingDisplay !== '—' && !ratingDisplay.includes('⭐')) ratingDisplay += ' ⭐';
+        document.getElementById('pdfSpecRating').innerText = ratingDisplay;
+
+        document.getElementById('pdfSpecWarranty').innerText = analysis.winner_warranty || '—';
+        document.getElementById('pdfSpecDelivery').innerText = analysis.winner_delivery || '—';
+        document.getElementById('pdfVerdictTxt').innerText = analysis.verdict || 'No verdict available.';
+
+        // Warning banner
+        const pdfWarningBox = document.getElementById('pdfWarningBox');
+        if (analysis.is_fake_discount) {
+            document.getElementById('pdfWarningTxt').innerText = analysis.price_warning || 'Deceptive price manipulation detected.';
+            pdfWarningBox.style.display = 'block';
+        } else {
+            pdfWarningBox.style.display = 'none';
+        }
+
+        // Chart image
+        const pdfChartImg = document.getElementById('pdfChartImg');
+        const pdfChartContainer = document.getElementById('pdfChartContainer');
+        if (priceChartInstance) {
+            pdfChartImg.src = priceChartInstance.toBase64Image('image/png', 1);
+            pdfChartContainer.style.display = 'block';
+        } else {
+            pdfChartContainer.style.display = 'none';
+        }
+
+        // Comparison table
+        const pdfTableBody = document.getElementById('pdfTableBody');
+        pdfTableBody.innerHTML = '';
+        if (analysis.compared_options && analysis.compared_options.length > 0) {
+            analysis.compared_options.forEach(opt => {
+                const tr = document.createElement('tr');
+                let rating = opt.rating || '—';
+                if (rating !== '—' && !rating.includes('⭐')) rating += ' ⭐';
+
+                tr.innerHTML = `
+                    <td style="font-weight:700; color:#fff;">${opt.platform || '—'}</td>
+                    <td class="price-cell">${opt.price || '—'}</td>
+                    <td>${opt.condition || '—'}</td>
+                    <td style="color:#fbbf24;">${rating}</td>
+                    <td>${opt.warranty || '—'}</td>
+                    <td>${opt.delivery || '—'}</td>
+                `;
+                pdfTableBody.appendChild(tr);
+            });
+        }
+    }
+
+    /* ══════════════════════════════════════════════════
+       DOWNLOAD COLORFUL PDF REPORT
+       ══════════════════════════════════════════════════ */
+    async function downloadReport() {
+        if (!currentAnalysis) return;
+
+        const btn = document.querySelector('.download-btn');
+        const originalHtml = btn.innerHTML;
+        btn.disabled = true;
+        btn.style.opacity = '0.7';
+        btn.innerHTML = `
+            <svg viewBox="0 0 24 24" style="width: 12px; height: 12px; animation: spin-ring 1s linear infinite; stroke: currentColor; fill: none;" stroke-width="2.5">
+                <circle cx="12" cy="12" r="10" stroke-dasharray="32" stroke-dashoffset="10"/>
+            </svg>
+            Generating PDF...
+        `;
+
+        const container = document.getElementById('pdfReportContainer');
+
+        try {
+            populatePdfTemplate(currentAnalysis);
+
+            // Temporarily position and show for rendering
+            container.style.display = 'block';
+
+            // Brief pause for DOM and chart image decoding
+            await new Promise(resolve => setTimeout(resolve, 150));
+
+            const canvas = await html2canvas(container, {
+                scale: 2,
+                useCORS: true,
+                logging: false,
+                backgroundColor: '#060913'
+            });
+
+            container.style.display = 'none';
+
+            const imgData = canvas.toDataURL('image/png');
+            const { jsPDF } = window.jspdf;
+            const pdf = new jsPDF({
+                orientation: 'portrait',
+                unit: 'mm',
+                format: 'a4'
+            });
+
+            const imgWidth = 210; // A4 width in mm
+            const pageHeight = 297; // A4 height in mm
+            const imgHeight = (canvas.height * imgWidth) / canvas.width;
+
+            let heightLeft = imgHeight;
+            let position = 0;
+
+            pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
+            heightLeft -= pageHeight;
+
+            while (heightLeft > 5) {
+                position = heightLeft - imgHeight;
+                pdf.addPage();
+                pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
+                heightLeft -= pageHeight;
+            }
+
+            const query = document.getElementById('searchInput').value.trim() || 'Product';
+            const cleanQuery = query.replace(/[^a-zA-Z0-9]/g, '_');
+            pdf.save(`ValueScout_AI_Report_${cleanQuery}_${Date.now()}.pdf`);
+
+        } catch (err) {
+            container.style.display = 'none';
+            console.error('PDF Generation Failed:', err);
+            alert('Failed to generate PDF report: ' + (err.message || err));
+        } finally {
+            btn.disabled = false;
+            btn.style.opacity = '1';
+            btn.innerHTML = originalHtml;
+        }
+    }
+</script>
+</body>
+</html>
