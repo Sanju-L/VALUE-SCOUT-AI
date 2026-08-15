@@ -138,9 +138,10 @@ def analyze_product(
             "platform": item.get("source", "Unknown Platform"),
             "rating": str(item.get("rating", "—")),
             "delivery": item.get("delivery", "Standard"),
-            "condition": "Used" if "used" in item.get("title", "").lower() or "refurbished" in item.get("title", "").lower() else "New"
+            "condition": "Used" if "used" in item.get("title", "").lower() or "refurbished" in item.get("title", "").lower() else "New",
+            "product_url": item.get("link", item.get("product_link", ""))
         }
-        formatted_prompt_text += f"\nOption #{idx}:\n- Title: {p_info['title']}\n- Platform: {p_info['platform']}\n- Price: {p_info['price']}\n- Rating: {p_info['rating']}\n- Delivery: {p_info['delivery']}\n- Condition: {p_info['condition']}\n"
+        formatted_prompt_text += f"\nOption #{idx}:\n- Title: {p_info['title']}\n- Platform: {p_info['platform']}\n- Price: {p_info['price']}\n- Rating: {p_info['rating']}\n- Delivery: {p_info['delivery']}\n- Condition: {p_info['condition']}\n- Product URL: {p_info['product_url']}\n"
 
     # --- 5. EXPERT AI PROMPT (Real-Time Trend Calculation + User Filter Constraints) ---
     filter_instructions = []
@@ -186,13 +187,14 @@ def analyze_product(
       "winner_delivery": "Delivery Info",
       "winner_rating": "4.5",
       "winner_warranty": "1 Year",
+      "winner_url": "https://direct-link-to-the-winning-product-page",
       "verdict": "2-sentence explanation comparing it to the alternatives...",
       "price_history": {{"Mar": 62000, "Apr": 61000, "May": 60500, "Jun": 60000, "Jul": 71000, "Aug": 58900}},
       "is_fake_discount": true,
       "price_warning": "Warning: The seller artificially inflated the price by ~20% in July 2026 to make the current August deal appear better than it actually is.",
       "compared_options": [
-        {{"platform": "Amazon", "price": "Live Price", "condition": "New", "rating": "4.6", "warranty": "1 Year", "delivery": "Free"}},
-        {{"platform": "Flipkart", "price": "Live Price", "condition": "New", "rating": "4.5", "warranty": "1 Year", "delivery": "Free"}}
+        {{"platform": "Amazon", "price": "Live Price", "condition": "New", "rating": "4.6", "warranty": "1 Year", "delivery": "Free", "product_url": "https://direct-link-to-product"}},
+        {{"platform": "Flipkart", "price": "Live Price", "condition": "New", "rating": "4.5", "warranty": "1 Year", "delivery": "Free", "product_url": "https://direct-link-to-product"}}
       ]
     }}
     """
@@ -208,6 +210,42 @@ def analyze_product(
         parsed_ai_data = json.loads(ai_response.text)
     except Exception as err:
         return {"error": "Failed to parse AI output", "raw": ai_response.text}
+
+    # --- 5.5 INJECT REAL PRODUCT URLs FROM SERPAPI (don't rely on AI) ---
+    # Build a platform-name → URL lookup from the raw SerpAPI results
+    platform_url_map = {}
+    for item in diverse_products:
+        p_name = (item.get("source") or "").strip().lower()
+        p_url = item.get("link") or item.get("product_link") or ""
+        if p_name and p_url:
+            platform_url_map[p_name] = p_url
+
+    # Inject URLs into compared_options
+    if parsed_ai_data.get("compared_options"):
+        for opt in parsed_ai_data["compared_options"]:
+            opt_platform = (opt.get("platform") or "").strip().lower()
+            if not opt.get("product_url") or not str(opt.get("product_url", "")).startswith("http"):
+                # Try exact match first, then partial match
+                matched_url = platform_url_map.get(opt_platform, "")
+                if not matched_url:
+                    for key, url in platform_url_map.items():
+                        if opt_platform in key or key in opt_platform:
+                            matched_url = url
+                            break
+                opt["product_url"] = matched_url
+
+    # Inject winner URL
+    winner_platform = (parsed_ai_data.get("winner_platform") or "").strip().lower()
+    if not parsed_ai_data.get("winner_url") or not str(parsed_ai_data.get("winner_url", "")).startswith("http"):
+        matched_winner_url = platform_url_map.get(winner_platform, "")
+        if not matched_winner_url:
+            for key, url in platform_url_map.items():
+                if winner_platform in key or key in winner_platform:
+                    matched_winner_url = url
+                    break
+        parsed_ai_data["winner_url"] = matched_winner_url
+
+    print(f"🔗 Injected URLs for {len(platform_url_map)} platforms: {list(platform_url_map.keys())}")
 
     # --- 6. SAVE TO SUPABASE ---
     try:

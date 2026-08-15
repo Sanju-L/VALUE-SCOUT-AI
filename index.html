@@ -840,7 +840,102 @@
         }
 
         .table-rating {
-            color: #fbbf24;
+            color: #fbbf24; 
+        }
+
+        /* ══════════════════════════════════════════════════
+           PRODUCT DIRECT LINK BUTTONS
+           ══════════════════════════════════════════════════ */
+        .buy-now-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 22px;
+            border: none;
+            border-radius: 10px;
+            background: linear-gradient(135deg, #00ff66, #00c8d6);
+            color: #000;
+            font-family: var(--font-sans);
+            font-size: 12px;
+            font-weight: 800;
+            letter-spacing: 1.2px;
+            text-transform: uppercase;
+            text-decoration: none;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.22, 1, 0.36, 1);
+            box-shadow: 0 4px 20px rgba(0, 255, 102, 0.2);
+            position: relative;
+            overflow: hidden;
+            margin-top: 16px;
+        }
+
+        .buy-now-btn::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(135deg, rgba(255,255,255,0.2), transparent);
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+
+        .buy-now-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 30px rgba(0, 255, 102, 0.35), 0 0 15px rgba(0, 255, 102, 0.15);
+        }
+
+        .buy-now-btn:hover::before {
+            opacity: 1;
+        }
+
+        .buy-now-btn:active {
+            transform: translateY(0px) scale(0.98);
+        }
+
+        .buy-now-btn svg {
+            width: 14px;
+            height: 14px;
+            stroke: #000;
+            flex-shrink: 0;
+        }
+
+        .table-link-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            padding: 5px 12px;
+            border: 1px solid rgba(0, 243, 255, 0.25);
+            border-radius: 6px;
+            background: rgba(0, 243, 255, 0.08);
+            color: var(--cyan);
+            font-family: var(--font-sans);
+            font-size: 11px;
+            font-weight: 700;
+            letter-spacing: 0.5px;
+            text-decoration: none;
+            text-transform: uppercase;
+            cursor: pointer;
+            transition: all 0.25s ease;
+            white-space: nowrap;
+        }
+
+        .table-link-btn:hover {
+            background: rgba(0, 243, 255, 0.18);
+            border-color: rgba(0, 243, 255, 0.5);
+            box-shadow: 0 0 12px rgba(0, 243, 255, 0.2);
+            transform: translateY(-1px);
+        }
+
+        .table-link-btn svg {
+            width: 11px;
+            height: 11px;
+            stroke: var(--cyan);
+            flex-shrink: 0;
+        }
+
+        .table-link-na {
+            color: var(--text-muted);
+            font-size: 11px;
+            font-style: italic;
         }
 
         /* ══════════════════════════════════════════════════
@@ -1655,7 +1750,12 @@
                     </div>
                 </div>
 
-                <div class="verdict-box">
+                <a href="#" id="winnerBuyBtn" class="buy-now-btn" target="_blank" rel="noopener noreferrer" style="display: none;">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 6H5.25A2.25 2.25 0 0 0 3 8.25v10.5A2.25 2.25 0 0 0 5.25 21h10.5A2.25 2.25 0 0 0 18 18.75V10.5m-10.5 6L21 3m0 0h-5.25M21 3v5.25"/></svg>
+                    Buy Now — Direct Link
+                </a>
+
+                <div class="verdict-box" style="margin-top: 20px;">
                     <div class="verdict-label">
                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M9.663 17h4.674M12 3v1m6.364 1.636-.707.707M21 12h-1M4 12H3m3.343-5.657-.707-.707m2.828 9.9a5 5 0 1 1 7.072 0l-.548.547A3.374 3.374 0 0 0 14 18.469V19a2 2 0 1 1-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547Z"/></svg>
                         AI Verdict
@@ -1696,6 +1796,7 @@
                             <th>Rating</th>
                             <th>Warranty</th>
                             <th>Delivery</th>
+                            <th>Link</th>
                         </tr>
                     </thead>
                     <tbody id="tableBody"></tbody>
@@ -1801,6 +1902,7 @@
                     <th>Rating</th>
                     <th>Warranty</th>
                     <th>Delivery</th>
+                    <th>Link</th>
                 </tr>
             </thead>
             <tbody id="pdfTableBody"></tbody>
@@ -1952,6 +2054,7 @@
             workingAnalysis.winner_rating = winnerItem.rating || originalAnalysis.winner_rating;
             workingAnalysis.winner_warranty = winnerItem.warranty || originalAnalysis.winner_warranty;
             workingAnalysis.winner_delivery = winnerItem.delivery || originalAnalysis.winner_delivery;
+            workingAnalysis.winner_url = winnerItem.product_url || originalAnalysis.winner_url;
         }
 
         currentAnalysis = workingAnalysis;
@@ -1977,6 +2080,15 @@
         document.getElementById('aiVerdict').innerText = analysis.verdict || 'No verdict available.';
         document.getElementById('dataSource').innerText = `src: ${analysis.source || 'AI'}`;
 
+        // ── Winner Buy Now Button ──
+        const buyBtn = document.getElementById('winnerBuyBtn');
+        if (analysis.winner_url && analysis.winner_url.startsWith('http')) {
+            buyBtn.href = analysis.winner_url;
+            buyBtn.style.display = 'inline-flex';
+        } else {
+            buyBtn.style.display = 'none';
+        }
+
         // ── Deceptive Pricing Banner ──
         const priceBanner = document.getElementById('priceBanner');
         if (analysis.is_fake_discount) {
@@ -2001,6 +2113,14 @@
                 let rating = opt.rating || '—';
                 if (rating !== '—' && !rating.includes('⭐')) rating += ' ⭐';
 
+                const hasUrl = opt.product_url && opt.product_url.startsWith('http');
+                const linkCell = hasUrl
+                    ? `<a href="${opt.product_url}" target="_blank" rel="noopener noreferrer" class="table-link-btn">
+                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 6H5.25A2.25 2.25 0 0 0 3 8.25v10.5A2.25 2.25 0 0 0 5.25 21h10.5A2.25 2.25 0 0 0 18 18.75V10.5m-10.5 6L21 3m0 0h-5.25M21 3v5.25"/></svg>
+                         View
+                       </a>`
+                    : `<span class="table-link-na">—</span>`;
+
                 tr.innerHTML = `
                     <td>${opt.platform || '—'}</td>
                     <td class="table-price">${opt.price || '—'}</td>
@@ -2008,13 +2128,14 @@
                     <td class="table-rating">${rating}</td>
                     <td>${opt.warranty || '—'}</td>
                     <td>${opt.delivery || '—'}</td>
+                    <td>${linkCell}</td>
                 `;
                 tableBody.appendChild(tr);
             });
         } else {
             tableBody.innerHTML = `
                 <tr>
-                    <td colspan="6" style="text-align:center; padding: 24px; color: var(--text-muted);">
+                    <td colspan="7" style="text-align:center; padding: 24px; color: var(--text-muted);">
                         ⚠️ No marketplace options matched your active custom filters.<br>
                         <button onclick="resetFilters()" style="margin-top:10px; background: rgba(0,243,255,0.1); border: 1px solid rgba(0,243,255,0.3); color: var(--cyan); padding: 6px 14px; border-radius: 8px; cursor: pointer;">Reset Filters</button>
                     </td>
@@ -2254,6 +2375,7 @@
                     <td style="color:#fbbf24;">${rating}</td>
                     <td>${opt.warranty || '—'}</td>
                     <td>${opt.delivery || '—'}</td>
+                    <td>${opt.product_url && opt.product_url.startsWith('http') ? `<a href="${opt.product_url}" style="color:#00f3ff; text-decoration:none; font-weight:600; font-size:10px;">View ↗</a>` : '—'}</td>
                 `;
                 pdfTableBody.appendChild(tr);
             });
